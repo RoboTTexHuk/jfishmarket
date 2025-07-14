@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+  <meta charset="UTF-8">
+  <title>JFish Market</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Для иконок -->
+  <style>
+    body { background: #141b33; color: #fff; font-family: 'Montserrat', Arial, sans-serif; margin:0; }
+    .main-content { max-width: 550px; margin: 0 auto; padding: 1em 0 96px 0; }
+    .logo { text-align: center; font-weight: 900; font-size: 2em; color: #ffd44d; margin: 1em 0; }
+    .banner { display: flex; justify-content: space-around; padding: 1em; background: #141b33; }
+    .banner-item { text-align: center; font-size: 0.9em; color: #fff; }
+    .banner-item i { color: #ffd44d; font-size: 1.5em; margin-bottom: 0.2em; }
+    .fish-list { display: flex; flex-direction: column; gap: 1.5em; }
+    .fish-card { background: #192045; border-radius: 20px; box-shadow: 0 2px 24px #0007;
+      padding: 1em; margin: 0 10px; display: flex; flex-direction: column; align-items: center; }
+    .fish-img-wrap { width: 100%; border-radius: 15px; overflow: hidden; height: 180px; }
+    .fish-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .fish-title { font-size: 1.2em; font-weight: 800; color: #ffd44d; margin: 0.5em 0; }
+    .fish-meta { font-size: 1em; color: #eaeaea; margin-bottom: 0.5em; }
+    .fish-counter-row { display: flex; gap: 2em; margin-bottom: 0.5em; }
+    .counter-box { display: flex; align-items: center; background: #1d2547; border-radius: 12px; border: 2px solid #222b4d; }
+    .counter-btn { background: none; border: none; color: #ffd44d; font-size: 1.5em; padding: 0 0.5em; cursor: pointer; }
+    .counter-val { width: 30px; text-align: center; background: none; border: none; color: #fff; font-weight: 700; }
+    .counter-label { color: #fff; text-align: center; font-size: 0.9em; }
+    .add-cart-btn { width: 100%; background: #222b4d; color: #ffd44d; font-weight: bold; border: none; border-radius: 10px; padding: 1em; cursor: pointer; margin-top: 0.5em; }
+    .show-map-btn { width: 100%; background: #ffd44d; color: #141b33; font-weight: bold; border: none; border-radius: 10px; padding: 1em; cursor: pointer; margin-top: 0.5em; }
+    nav.bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; width: 100vw; height: 70px; z-index: 100;
+      background: #141b33; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); }
+    .nav-tab { background: none; border: none; color: #fff; font-size: 0.8em; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; }
+    .nav-tab.active { color: #ffd44d; }
+    .nav-tab i { font-size: 1.5em; margin-bottom: 0.2em; }
+    .badge { position: absolute; top: -5px; right: -10px; background: red; color: white; border-radius: 50%; padding: 0.2em 0.5em; font-size: 0.7em; display: none; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .cart-list { list-style: none; padding: 0; margin: 1em 0; }
+    .cart-item { display: flex; justify-content: space-between; padding: 1em; border-bottom: 1px solid #232b4e; color: #fff; }
+    .cart-empty { text-align: center; padding: 2em; color: #b9b9c9; }
+    .help-content { padding: 1em; line-height: 1.5; }
+    .map-list { display: flex; flex-direction: column; gap: 1em; padding: 1em; }
+    .map-card { background: #192045; border-radius: 15px; padding: 1em; text-align: center; }
+    .map-iframe { width: 100%; height: 150px; border-radius: 10px; margin-bottom: 1em; filter: grayscale(100%); } /* Серый стиль для имитации скрина */
+    .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); }
+    .modal-content { background: #192045; margin: 15% auto; padding: 1em; border-radius: 15px; width: 80%; max-width: 400px; text-align: center; color: #fff; }
+    .close-btn { color: #ffd44d; float: right; font-size: 1.5em; cursor: pointer; }
+    .close-btn:hover { color: #fff; }
+    .order-form { display: flex; flex-direction: column; gap: 1em; padding: 1em; }
+    .order-form input { padding: 0.7em; border-radius: 8px; border: 2px solid #444a6c; background: #141b33; color: #fff; }
+    @media (max-width: 600px) { .main-content { padding: 0.5em 0 80px 0; } }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <div class="logo">JFish Market</div>
+    <div class="banner">
+      <div class="banner-item">
+        <i class="fas fa-box"></i>
+        <p>Free delivery<br>from $100</p>
+      </div>
+      <div class="banner-item">
+        <i class="fas fa-fish"></i>
+        <p>100+ types<br>of fish</p>
+      </div>
+      <div class="banner-item">
+        <i class="fas fa-rocket"></i>
+        <p>Next-day<br>delivery</p>
+      </div>
+    </div>
+    <div id="fishTab" class="tab-content active">
+      <div class="fish-list" id="fishList"></div>
+    </div>
+    <div id="cartTab" class="tab-content">
+      <ul class="cart-list" id="cartList"></ul>
+      <div id="cartEmpty" class="cart-empty" style="display: block;">Cart is empty</div>
+      <button class="show-map-btn" id="checkoutBtn" style="display: none;">Checkout</button>
+      <div id="orderFormWrap"></div>
+      <div id="orderMsg" style="display:none; color: #ffd44d; text-align: center; padding: 2em;">Thank you! We will contact you to confirm the order.</div>
+    </div>
+    <div id="helpTab" class="tab-content">
+      <div class="help-content">
+        <p>Welcome to the Help section. Here you can find information on how to use the app.</p>
+        <p>- Browse fish in the Fish tab.</p>
+        <p>- Add to cart and checkout in the Cart tab.</p>
+        <p>- View fish habitats on the Map tab.</p>
+        <p>If you have questions, contact support at support@jfishmarket.com.</p>
+      </div>
+    </div>
+    <div id="mapTab" class="tab-content">
+      <div class="map-list" id="mapList"></div>
+    </div>
+  </div>
+  <!-- Modal for map -->
+  <div id="mapModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">×</span>
+      <h2 id="modalTitle"></h2>
+      <div style="text-align: center; margin-bottom: 1em;">Catch location</div>
+      <iframe id="modalMapIframe" class="map-iframe" loading="lazy" allowfullscreen=""></iframe>
+      <p>Country: <span id="modalCountry"></span></p>
+      <p>Body of water: <span id="modalWater"></span></p>
+      <p>Coordinates: <span id="modalCoords"></span></p>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-tab active" id="tabBtn_fish" onclick="switchTab('fish')"><i class="fas fa-fish"></i>Fish</button>
+    <button class="nav-tab" id="tabBtn_cart" onclick="switchTab('cart')"><i class="fas fa-shopping-cart"></i>Cart <span id="cartBadge" class="badge"></span></button>
+    <button class="nav-tab" id="tabBtn_map" onclick="switchTab('map')"><i class="fas fa-map-marker-alt"></i>Map</button>
+    <button class="nav-tab" id="tabBtn_help" onclick="switchTab('help')"><i class="fas fa-question-circle"></i>Help</button>
+  </nav>
+  <script>
+    // Data (removed prices)
+    const fishData = [
+      {name: "Piranha", country: "South America", water: "Amazon River", img: "images/piranha.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Guppy", country: "Venezuela", water: "Freshwater Streams", img: "images/guppy.jpg", lat: 10.4806, lng: -66.9036},
+      {name: "Carp", country: "Europe", water: "Rivers and Lakes", img: "images/carp.jpg", lat: 51.5074, lng: -0.1278},
+      {name: "Swordtail", country: "Mexico", water: "Rivers", img: "images/swordtail.jpg", lat: 19.4326, lng: -99.1332},
+      {name: "Astronotus", country: "South America", water: "Amazon River", img: "images/astronotus.jpg", lat: -3.1190, lng: -60.0217},
+      {name: "Angelfish", country: "South America", water: "Amazon Basin", img: "images/angelfish.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Barbus", country: "Africa", water: "Rivers", img: "images/barbus.jpg", lat: 1.2921, lng: 36.8219},
+      {name: "Betta", country: "Thailand", water: "Southeast Asia Waters", img: "images/betta.jpg", lat: 13.7563, lng: 100.5018},
+      {name: "Neon", country: "South America", water: "Amazon Tributaries", img: "images/neon.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Corydoras", country: "South America", water: "Rivers", img: "images/corydoras.jpg", lat: -15.8267, lng: -47.9218},
+      {name: "Labeo", country: "Africa", water: "Rivers", img: "images/labeo.jpg", lat: 1.2921, lng: 36.8219},
+      {name: "Danio", country: "India", water: "South Asia Waters", img: "images/danio.jpg", lat: 28.6139, lng: 77.2090},
+      {name: "Tetra", country: "South America", water: "Freshwaters", img: "images/tetra.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Molly", country: "Mexico", water: "Central America Waters", img: "images/molly.jpg", lat: 19.4326, lng: -99.1332},
+      {name: "Discus", country: "South America", water: "Amazon Basin", img: "images/discus.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Goldfish", country: "East Asia", water: "Freshwaters", img: "images/goldfish.jpg", lat: 39.9042, lng: 116.4074},
+      {name: "Pterygoplichthys", country: "South America", water: "Rivers", img: "images/pterygoplichthys.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Macropod", country: "Southeast Asia", water: "Waters", img: "images/macropod.jpg", lat: 13.7563, lng: 100.5018},
+      {name: "Ancistrus", country: "South America", water: "Rivers", img: "images/ancistrus.jpg", lat: -3.4653, lng: -62.2159},
+      {name: "Platy", country: "Central America", water: "Waters", img: "images/platy.jpg", lat: 19.4326, lng: -99.1332}
+    ];
+    let maleCounts = new Array(fishData.length).fill(0);
+    let femaleCounts = new Array(fishData.length).fill(0);
+    let cart = [];
+    let mapRendered = false;
+
+    function renderFishList() {
+      const fishList = document.getElementById('fishList');
+      fishList.innerHTML = '';
+      fishData.forEach((f, idx) => {
+        fishList.innerHTML += `
+          <div class="fish-card">
+            <div class="fish-img-wrap"><img src="${f.img}" alt="${f.name}"></div>
+            <div class="fish-title">${f.name}</div>
+            <div class="fish-meta">${f.country}, ${f.water}</div>
+            <div class="fish-counter-row">
+              <div class="fish-counter-block">
+                <div class="counter-box">
+                  <button class="counter-btn" onclick="updateCnt(${idx}, 'male', -1)">-</button>
+                  <input class="counter-val" type="text" value="${maleCounts[idx]}" readonly>
+                  <button class="counter-btn" onclick="updateCnt(${idx}, 'male', 1)">+</button>
+                </div>
+                <div class="counter-label">Male</div>
+              </div>
+              <div class="fish-counter-block">
+                <div class="counter-box">
+                  <button class="counter-btn" onclick="updateCnt(${idx}, 'female', -1)">-</button>
+                  <input class="counter-val" type="text" value="${femaleCounts[idx]}" readonly>
+                  <button class="counter-btn" onclick="updateCnt(${idx}, 'female', 1)">+</button>
+                </div>
+                <div class="counter-label">Female</div>
+              </div>
+            </div>
+            <button class="add-cart-btn" onclick="addToCart(${idx})">Add to Cart</button>
+            <button class="show-map-btn" onclick="showMap(${idx})">Show map</button>
+          </div>
+        `;
+      });
+    }
+
+    function updateCnt(idx, gender, delta) {
+      if (gender === 'male') {
+        maleCounts[idx] = Math.max(0, maleCounts[idx] + delta);
+      } else {
+        femaleCounts[idx] = Math.max(0, femaleCounts[idx] + delta);
+      }
+      renderFishList(); // Re-render to update counts
+    }
+
+    function showMap(idx) {
+      const f = fishData[idx];
+      document.getElementById('modalTitle').textContent = f.name;
+      document.getElementById('modalCountry').textContent = f.country;
+      document.getElementById('modalWater').textContent = f.water;
+      document.getElementById('modalCoords').textContent = `${f.lat}, ${f.lng}`;
+      document.getElementById('modalMapIframe').src = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d10000!2d${f.lng}!3d${f.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1619524991420!5m2!1sen!2sus`;
+      document.getElementById('mapModal').style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById('mapModal').style.display = "none";
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+      document.getElementById(tab + 'Tab').classList.add('active');
+      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById('tabBtn_' + tab).classList.add('active');
+      if (tab === 'map') renderMapTab();
+      if (tab === 'cart') renderCart();
+    }
+
+    function renderMapTab() {
+      if (mapRendered) return;
+      const mapList = document.getElementById('mapList');
+      mapList.innerHTML = '';
+      fishData.forEach(f => {
+        mapList.innerHTML += `
+          <div class="map-card">
+            <div style="text-align: center; margin-bottom: 1em;">Catch location</div>
+            <iframe class="map-iframe" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d10000!2d${f.lng}!3d${f.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1619524991420!5m2!1sen!2sus" loading="lazy" allowfullscreen></iframe>
+            <div class="fish-title">${f.name}</div>
+            <p>Country: ${f.country}</p>
+            <p>Body of water: ${f.water}</p>
+            <p>Coordinates: ${f.lat}, ${f.lng}</p>
+          </div>
+        `;
+      });
+      mapRendered = true;
+    }
+
+    function addToCart(idx) {
+      const f = fishData[idx];
+      if (maleCounts[idx] > 0 || femaleCounts[idx] > 0) {
+        if (maleCounts[idx] > 0) cart.push({name: f.name, type: 'Male', qty: maleCounts[idx]});
+        if (femaleCounts[idx] > 0) cart.push({name: f.name, type: 'Female', qty: femaleCounts[idx]});
+        updateCartBadge();
+        alert('Added to cart!');
+      } else {
+        alert('Please select quantity!');
+      }
+    }
+
+    function updateCartBadge() {
+      const total = cart.reduce((acc, item) => acc + item.qty, 0);
+      const badge = document.getElementById('cartBadge');
+      badge.textContent = total;
+      badge.style.display = total > 0 ? 'block' : 'none';
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cartList');
+      list.innerHTML = '';
+      if (cart.length === 0) {
+        document.getElementById('cartEmpty').style.display = 'block';
+        document.getElementById('checkoutBtn').style.display = 'none';
+      } else {
+        document.getElementById('cartEmpty').style.display = 'none';
+        document.getElementById('checkoutBtn').style.display = 'block';
+        cart.forEach((item, i) => {
+          list.innerHTML += `
+            <li class="cart-item">
+              <span>${item.name} (${item.type}) x ${item.qty}</span>
+              <button class="cart-remove" onclick="removeCart(${i})">x</button>
+            </li>
+          `;
+        });
+      }
+      updateCartBadge();
+    }
+
+    function removeCart(i) {
+      cart.splice(i, 1);
+      renderCart();
+    }
+
+    document.getElementById('checkoutBtn').onclick = function() {
+      document.getElementById('orderFormWrap').innerHTML = `
+        <form class="order-form">
+          <label for="orderName">Your name</label>
+          <input type="text" id="orderName">
+          <label for="orderEmail">Email</label>
+          <input type="email" id="orderEmail">
+          <button type="button" class="show-map-btn" onclick="submitOrder()">Submit</button>
+        </form>
+      `;
+    };
+
+    function submitOrder() {
+      // Простая валидация и симуляция отправки
+      const name = document.getElementById('orderName').value;
+      const email = document.getElementById('orderEmail').value;
+      if (name && email) {
+        document.getElementById('orderFormWrap').innerHTML = '';
+        document.getElementById('orderMsg').style.display = 'block';
+        cart = [];
+        updateCartBadge();
+        setTimeout(() => {
+          document.getElementById('orderMsg').style.display = 'none';
+          switchTab('fish');
+        }, 3000);
+      } else {
+        alert('Please fill in name and email.');
+      }
+    }
+
+    renderFishList();
+    updateCartBadge();
+  </script>
+
+
+</body></html>
